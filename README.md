@@ -9,7 +9,7 @@ Multiple group activities require retrieving files from the ENA, and FTP is slow
 * **ena.sh** contains functions for querying files in the ENA. 
 * **fetchFASTQFromENA.sh** is a script for downloading all files for a library to a specified directory.
 
-To function an 'ena_credntials.sh' file must be placed in the checkout location for this repository, containing variable definitions like:
+To function, an 'ena_credentials.sh' file must be placed in the checkout location for this repository, containing variable definitions like:
 
 ```
 ENA_NODE=''
