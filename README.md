@@ -8,6 +8,7 @@ Multiple group activities require retrieving files from the ENA, and FTP is slow
 
 * **ena.sh** contains functions for querying files in the ENA. 
 * **fetchFASTQFromENA.sh** is a script for downloading all files for a library to a specified directory.
+* **fetchSdrfFASTQFromENA.sh** wraps **fetchFASTQFromENA.sh** to download FASTQ files for runs in an SDRF file.
 
 To function, an 'ena_credentials.sh' file must be placed in the checkout location for this repository, containing variable definitions like:
 
@@ -18,3 +19,17 @@ ENA_ROOT_DIR=''
 ```
 
 ENA_NODE is the host name of the ENA machine. ENA_USER is a user name with permission to SSH to that host, which you either are, or to which you can sudo. ENA_ROOT_DIR is the root location on the ENA host machine where the fastq files are stored.
+
+### Fetch run fastq files from the ENA
+
+```
+fetchFASTQFromENA.sh SRR5102087 scratch no
+```
+
+This will download FASTQ files for run SRR5102087 to the directory 'scratch'. By default, this will create subdirectory structure mirroring that in the ENA, e.g. SRR510/007/SRR5102087, but to disable this and place all files in the top level of the target directory use the third argument, setting its value to anything other than 'yes'.
+
+### Fetch all run fastq files for runs in an SDRF
+
+```
+sh fetchSdrfFASTQFromENA.sh E-ENAD-14.sdrf.txt ManuallyDownloaded/E-ENAD-14
+```

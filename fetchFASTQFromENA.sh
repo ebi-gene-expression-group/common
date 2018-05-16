@@ -6,7 +6,7 @@ scriptDir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $scriptDir/ena.sh
 
 if [ $# -lt 2 ]; then
-    echo "Usage: $0 LIBRARY OUTPUT_DIRECTORY"
+    echo "Usage: $0 LIBRARY OUTPUT_DIRECTORY [ENA_STRUCTURE_AT_OUTPUT? (yes/no)]"
     exit 1
 fi
 
@@ -29,17 +29,21 @@ else
 fi
 
 mkdir -p $localFastqDir
-chmod -R g+w $localFastqDir
+chmod g+w $localFastqDir
 
 # Get all files for the library with rsync
 
-`fetch_ena_sudo_string` rsync -ssh -avh --no-p ${ENA_NODE}:${ENA_ROOT_DIR}/${subDir}/ $localFastqDir > /dev/null 2>&1
+sudoString=`fetch_ena_sudo_string`
+if [ $? -ne 0 ]; then exit 1; fi
+
+$sudoString rsync -ssh -avh --no-p --no-o --no-g ${ENA_NODE}:${ENA_ROOT_DIR}/${subDir}/ $localFastqDir > /dev/null 2>&1
+
 errCode=$?
 
 if [ $errCode -ne 0 ]; then 
     echo "$library file download failed (err code $errCode)"
     exit 1
 else
-    echo "$library files downloaded successfully to ${outputDirectory}/$subDir"
+    echo "$library files downloaded successfully to ${localFastqDir}"
     exit 0
 fi

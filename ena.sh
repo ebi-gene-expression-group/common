@@ -55,7 +55,7 @@ check_sudo() {
 
     if [ $? -ne 0 ]; then
         echo "Couldn't sudo to sudoUser"
-        exit 1
+        return 1
     fi
 }
 
@@ -66,7 +66,10 @@ check_sudo() {
 check_file_in_ena() {
     local enaFile=$1
 
-    `fetch_ena_sudo_string`ssh -n ${ENA_NODE} "ls ${enaFile}" > /dev/null 2>&1 
+    sudoString=`fetch_ena_sudo_string`
+    if [ $? -ne 0 ]; then return 1; fi
+
+    $sudoString ssh -n ${ENA_NODE} "ls ${enaFile}" > /dev/null 2>&1 
     if [ $? -eq 0 ]; then
         return 0
     else
@@ -82,12 +85,15 @@ fetch_file_from_ena() {
 
     check_variables "flub" "enaFile" "destFile"
     
+    sudoString=`fetch_ena_sudo_string`
+    if [ $? -ne 0 ]; then return 1; fi
+    
     echo "Downloading remote file $enaFile to $destFile"
 
-    `fetch_ena_sudo_string` rsync -ssh -avc ${ENA_NODE}:$enaFile $destFile
+    $sudoString rsync -ssh -avc ${ENA_NODE}:$enaFile $destFile
     if [ $? -ne 0 ] || [ ! -s $destFile ] ; then
         echo "Failed to retrieve $enaFile to $destFile" >&2
-        exit 3
+        return 3
     fi
 }
 
@@ -99,6 +105,7 @@ fetch_ena_sudo_string() {
     currentUser=`whoami`
     if [ $currentUser != $ENA_USER ]; then
         check_sudo $ENA_USER
+        if [ $? -ne 0 ]; then return 1; fi
         sudoString="sudo -u $ENA_USER "
     else
         sudoString=""
@@ -115,4 +122,20 @@ get_ena_library_files() {
 
     `fetch_ena_sudo_string` ssh -n ${ENA_NODE} ls ${ENA_ROOT_DIR}/$libDir/*
 }
+
+# Extract ENA runs from an SDRF
+
+get_ENA_runs_from_sdrf() {
+    local sdrfFile=$1
+
+    runs=$(awk -F'\t' -vcol='ENA_RUN' '(NR==1){colnum=-1;for(i=1;i<=NF;i++)if($(i)~col)colnum=i;}{print $(colnum)}' $sdrfFile 2>/dev/null)
+
+    if [ $? -ne 0 ]; then
+        echo "$sdrfFile does not contain ENA_RUN elements"
+        return 1
+    fi
+
+    echo -e "$runs" | tail -n +2 | uniq 
+}
+
 
