@@ -73,6 +73,7 @@ check_file_in_ena() {
     if [ $? -eq 0 ]; then
         return 0
     else
+        echo "${enaFile} not present on ${ENA_NODE}"
         return 1
     fi
 }
@@ -83,17 +84,25 @@ fetch_file_from_ena() {
     local enaFile=$1
     local destFile=$2
 
-    check_variables "flub" "enaFile" "destFile"
-    
+    check_variables "enaFile" "destFile"
+
+    # Check we can sudo to the necessary user
     sudoString=`fetch_ena_sudo_string`
+    if [ $? -ne 0 ]; then return 1; fi
+
+    # Check file is present at specified location    
+    check_file_in_ena $enaFile    
     if [ $? -ne 0 ]; then return 1; fi
     
     echo "Downloading remote file $enaFile to $destFile"
 
-    $sudoString rsync -ssh -avc ${ENA_NODE}:$enaFile $destFile
+    $sudoString rsync -ssh -avc ${ENA_NODE}:$enaFile $destFile > /dev/null
     if [ $? -ne 0 ] || [ ! -s $destFile ] ; then
         echo "Failed to retrieve $enaFile to $destFile" >&2
         return 3
+    else 
+        echo "Success!"
+        return 0
     fi
 }
 
@@ -138,4 +147,10 @@ get_ENA_runs_from_sdrf() {
     echo -e "$runs" | tail -n +2 | uniq 
 }
 
+# Convert an SRA-style FTP link to its path on the ENA node 
 
+convert_ena_fastq_to_path(){
+    local fastq=$1
+    
+    echo ${ENA_ROOT_DIR}/`echo $fastq | grep -oP "[SED]RR.*"` 
+}
