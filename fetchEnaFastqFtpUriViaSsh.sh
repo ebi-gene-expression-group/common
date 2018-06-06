@@ -24,3 +24,4 @@ if [[ $ftp_uri =~ .*ftp.sra.ebi.ac.uk.* ]]; then
 else
     echo "File is not ENA- just wget'ing"
     wget  -nv -c $url -O $target_local_filename.tmp && mv $target_local_filename.tmp $target_local_filename  
+fi
