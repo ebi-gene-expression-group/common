@@ -20,6 +20,14 @@ ENA_ROOT_DIR=''
 
 ENA_NODE is the host name of the ENA machine. ENA_USER is a user name with permission to SSH to that host, which you either are, or to which you can sudo. ENA_ROOT_DIR is the root location on the ENA host machine where the fastq files are stored.
 
+### Fetch a single fastq file using its FTP link
+
+It's handy to supply an FTP link and have the link converted to a file path and retrieved. Do so like:
+
+```
+fetchEnaFastqFtpUriViaSsh.sh ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR510/002/SRR5101952/SRR5101952_2.fastq.gz SRR5101952_2.fastq.gz
+```
+
 ### Fetch run fastq files from the ENA
 
 ```
@@ -33,3 +41,5 @@ This will download FASTQ files for run SRR5102087 to the directory 'scratch'. By
 ```
 sh fetchSdrfFASTQFromENA.sh E-ENAD-14.sdrf.txt ManuallyDownloaded/E-ENAD-14
 ```
+
+

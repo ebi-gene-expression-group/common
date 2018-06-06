@@ -94,11 +94,14 @@ fetch_file_from_ena() {
     check_file_in_ena $enaFile    
     if [ $? -ne 0 ]; then return 1; fi
     
-    echo "Downloading remote file $enaFile to $destFile"
+    # Copy file with sudo'd user as appropriate. Then copy the file to a
+    # location with the correct user, and remove the old one. This works, while
+    # a 'chown' would not.
 
-    $sudoString rsync -ssh -avc ${ENA_NODE}:$enaFile $destFile > /dev/null
-    if [ $? -ne 0 ] || [ ! -s $destFile ] ; then
-        echo "Failed to retrieve $enaFile to $destFile" >&2
+    echo "Downloading remote file $enaFile to $destFile"
+    chmod g+w $(dirname ${destFile}) && ($sudoString rsync -ssh -avc ${ENA_NODE}:$enaFile ${destFile}.tmp > /dev/null) && cp ${destFile}.tmp ${destFile} && rm -f ${destFile}.tmp > /dev/null
+    if [ $? -ne 0 ] || [ ! -s ${destFile} ] ; then
+        echo "Failed to retrieve $enaFile to ${destFile}" >&2
         return 3
     else 
         echo "Success!"
