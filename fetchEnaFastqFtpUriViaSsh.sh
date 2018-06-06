@@ -18,5 +18,9 @@ if [ -e "$target_local_filename" ]; then
     exit 1;
 fi
 
-ena_file_path=`convert_ena_fastq_to_path $ftp_uri`
-fetch_file_from_ena $ena_file_path $target_local_filename   
+if [[ $ftp_uri =~ .*ftp.sra.ebi.ac.uk.* ]]; then 
+    ena_file_path=`convert_ena_fastq_to_path $ftp_uri`
+    fetch_file_from_ena $ena_file_path $target_local_filename  
+else
+    echo "File is not ENA- just wget'ing"
+    wget  -nv -c $url -O $target_local_filename.tmp && mv $target_local_filename.tmp $target_local_filename  
