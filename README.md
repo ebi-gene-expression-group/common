@@ -28,6 +28,9 @@ It's handy to supply an FTP link and have the link converted to a file path and 
 fetchEnaFastqFtpUriViaSsh.sh ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR510/002/SRR5101952/SRR5101952_2.fastq.gz SRR5101952_2.fastq.gz
 ```
 
+This script also has a 'pass through' such that non-ENA links are retrieved using wget, allowing it to be used as a generic download function.
+
+
 ### Fetch run fastq files from the ENA
 
 ```
