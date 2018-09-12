@@ -50,7 +50,7 @@ if [ $errCode -ne 0 ]; then
     echo "$library file download failed (err code $errCode)"
     exit 1
 else
-    cp -r $localFastqDir.tmp $localFastqDir && rm -rf $localFastqDir.tmp
+    cp -r $localFastqDir.tmp $localFastqDir && chmod -R g+w $localFastqDir && rm -rf $localFastqDir.tmp
     errCode=$?
 
     if [ $errCode -ne 0 ]; then
