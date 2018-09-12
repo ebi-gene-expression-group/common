@@ -28,8 +28,6 @@ else
     localFastqDir=${outputDirectory}
 fi
 
-rm -rf $localFastqDir $localFastqDir.tmp
-
 # Get all files for the library with rsync
 
 sudoString=`fetch_ena_sudo_string`
@@ -39,10 +37,11 @@ if [ $? -ne 0 ]; then exit 1; fi
 # with the correct user, and remove the old one. This works, while a 'chown'
 # would not.
 
-mkdir $localFastqDir.tmp
-chmod g+rw $localFastqDir.tmp
+mkdir -p $localFastqDir
+TEMPDIR=$(mktemp -d -p $localFastqDir)
+chmod g+rwx $TEMPDIR
 
-$sudoString rsync -ssh -avh --no-p --no-o --no-g ${ENA_NODE}:${ENA_ROOT_DIR}/${subDir}/ $localFastqDir.tmp > /dev/null 2>&1
+$sudoString rsync -ssh -avh --no-p --no-o --no-g ${ENA_NODE}:${ENA_ROOT_DIR}/${subDir}/ $TEMPDIR > /dev/null 2>&1
 
 errCode=$?
 
@@ -50,7 +49,8 @@ if [ $errCode -ne 0 ]; then
     echo "$library file download failed (err code $errCode)"
     exit 1
 else
-    cp -r $localFastqDir.tmp $localFastqDir && chmod -R g+w $localFastqDir && rm -rf $localFastqDir.tmp
+    $sudoString chmod ug+rw $TEMPDIR/*
+    cp -rp $TEMPDIR/* $localFastqDir && rm -rf $TEMPDIR
     errCode=$?
 
     if [ $errCode -ne 0 ]; then
