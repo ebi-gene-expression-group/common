@@ -28,15 +28,18 @@ else
     localFastqDir=${outputDirectory}
 fi
 
-mkdir -p $localFastqDir
-chmod g+w $localFastqDir
+rm -rf $localFastqDir $localFastqDir.tmp
 
 # Get all files for the library with rsync
 
 sudoString=`fetch_ena_sudo_string`
 if [ $? -ne 0 ]; then exit 1; fi
 
-$sudoString rsync -ssh -avh --no-p --no-o --no-g ${ENA_NODE}:${ENA_ROOT_DIR}/${subDir}/ $localFastqDir > /dev/null 2>&1
+# Copy files with sudo'd user as appropriate. Then copy the files to a location
+# with the correct user, and remove the old one. This works, while a 'chown'
+# would not.
+
+$sudoString rsync -ssh -avh --no-p --no-o --no-g ${ENA_NODE}:${ENA_ROOT_DIR}/${subDir}/ $localFastqDir.tmp > /dev/null 2>&1
 
 errCode=$?
 
@@ -44,6 +47,9 @@ if [ $errCode -ne 0 ]; then
     echo "$library file download failed (err code $errCode)"
     exit 1
 else
+    $sudoString chmod -R a+w $localFastqDir.tmp && cp -r $localFastqDir.tmp $localFastqDir && rm -rf $localFastqDir.tmp
     echo "$library files downloaded successfully to ${localFastqDir}"
     exit 0
 fi
+
+
