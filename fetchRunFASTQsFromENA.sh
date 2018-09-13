@@ -41,7 +41,7 @@ mkdir -p $localFastqDir
 TEMPDIR=$(mktemp -d -p $localFastqDir)
 chmod g+rwx $TEMPDIR
 
-$sudoString rsync -ssh -avh --no-p --no-o --no-g ${ENA_NODE}:${ENA_ROOT_DIR}/${subDir}/ $TEMPDIR > /dev/null 2>&1
+$sudoString rsync -ssh -avh --no-p --no-o --no-g --omit-dir-times ${ENA_NODE}:${ENA_ROOT_DIR}/${subDir}/ $TEMPDIR > /dev/null 2>&1
 
 errCode=$?
 
