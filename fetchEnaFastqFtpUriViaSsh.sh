@@ -5,13 +5,17 @@
 scriptDir=$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source $scriptDir/ena.sh
 
-if [ $# -lt 2 ]; then
-    echo "Usage: $0 FTP_URI OUTPUT_FILE"
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 FTP_URI [OUTPUT_FILE]"
     exit 1
 fi
 
 ftp_uri=$1
 target_local_filename=$2
+
+if [ -z "$target_local_filename" ]; then
+    target_local_filename=$(basename $ftp_uri)
+fi
     
 if [ -e "$target_local_filename" ]; then
     echo "Local file name $target_local_filename already exists"
